@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filez</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+	<div class="pathline">
+		<span class="brand">Filez</span>
+		<nav class="breadcrumb" id="breadcrumb">
+			<a href="/?path=">/</a>
+		</nav>
+	</div>
+	<div class="actions">
+		<button type="button" id="newFolderBtn">New folder</button>
+		<label class="uploadBtn">
+			Upload
+			<input type="file" id="fileInput" multiple hidden>
+		</label>
+		<form method="post" action="/logout" style="display:inline">
+			<button type="submit">Logout</button>
+		</form>
+	</div>
+</header>
+
+<div id="dropzone" class="dropzone">
+	<p>Drag files here to upload into the current folder</p>
+</div>
+
+<main>
+	{{if .HasError}}<p class="err">{{.Error}}</p>{{end}}
+	<table>
+		<thead>
+			<tr><th>Name</th><th>Size</th><th>Modified</th><th>Actions</th></tr>
+		</thead>
+		<tbody>
+		{{if .Parent}}
+			<tr class="dir"><td><a href="/?path={{.Parent}}">..</a></td><td></td><td></td><td></td></tr>
+		{{else if .Path}}
+			<tr class="dir"><td><a href="/?path=">..</a></td><td></td><td></td><td></td></tr>
+		{{end}}
+		{{range .Entries}}
+			{{$p := printf "%s/%s" $.Path .Name}}
+			<tr class="{{if .IsDir}}dir{{else}}file{{end}}">
+				<td>
+					{{if .IsDir}}<a href="/?path={{$p}}">{{.Name}}/</a>{{else}}{{.Name}}{{end}}
+				</td>
+				<td>{{if .IsDir}}&mdash;{{else}}{{humanSize .Size}}{{end}}</td>
+				<td>{{.ModTime.Format "2006-01-02 15:04"}}</td>
+				<td class="actions-cell">
+					{{if not .IsDir}}
+					<button type="button" data-action="download" data-path="{{$p}}" data-name="{{.Name}}">Download</button>
+					<button type="button" data-action="blob" data-path="{{$p}}" data-name="{{.Name}}">JS</button>
+					{{end}}
+					<button type="button" data-action="delete" data-path="{{$p}}" data-name="{{.Name}}">Delete</button>
+				</td>
+			</tr>
+		{{end}}
+		{{if not .Entries}}<tr><td colspan="4" class="empty">empty</td></tr>{{end}}
+		</tbody>
+	</table>
+</main>
+
+<script>window.__CURRENT_PATH__ = {{.Path}};</script>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filez — Login</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-page">
+<form class="login-card" method="post" action="/login">
+	<h1>Filez</h1>
+	{{if .Err}}<p class="err">Invalid token</p>{{end}}
+	<input type="password" name="token" placeholder="token" autofocus required>
+	<button type="submit">Sign in</button>
+</form>
+</body>
+</html>
