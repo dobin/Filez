@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"html/template"
+	"strings"
 
 	"filez/web"
 )
@@ -13,7 +14,10 @@ type render struct {
 }
 
 func newRender() *render {
-	funcs := template.FuncMap{"humanSize": humanSize}
+	funcs := template.FuncMap{
+		"humanSize": humanSize,
+		"hasSuffix": func(s, suf string) bool { return strings.HasSuffix(strings.ToLower(s), suf) },
+	}
 	idx := template.Must(template.New("index.html").Funcs(funcs).ParseFS(web.TemplatesFS, "templates/index.html"))
 	lgn := template.Must(template.ParseFS(web.TemplatesFS, "templates/login.html"))
 	return &render{index: idx, login: lgn}

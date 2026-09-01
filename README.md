@@ -11,6 +11,10 @@ Minimal Go webapp for uploading, downloading, and managing files in a directory 
 # Build
 & "C:\Program Files\Go\bin\go.exe" build -o filez.exe .
 
+# Or: Cross-compile a Linux binary (amd64) from Windows
+# (Will polute $env)
+$env:GOOS="linux"; $env:GOARCH="amd64"; & "C:\Program Files\Go\bin\go.exe" build -o filez .
+
 # Start (root defaults to .\data, addr to :8080)
 .\filez.exe --root .\data --token secret
 # or:  $env:FILEZ_TOKEN="secret"; .\filez.exe

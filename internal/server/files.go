@@ -210,6 +210,91 @@ func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// isEditable reports whether a file may be opened in the text editor.
+func isEditable(name string) bool {
+	n := strings.ToLower(name)
+	return strings.HasSuffix(n, ".txt") || strings.HasSuffix(n, ".md")
+}
+
+// handleRead returns the raw text of an editable file.
+func (s *Server) handleRead(w http.ResponseWriter, r *http.Request) {
+	rel := r.URL.Query().Get("path")
+	abs, err := s.resolvePath(rel)
+	if err != nil {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	info, err := os.Stat(abs)
+	if err != nil || info.IsDir() {
+		http.Error(w, "not a file", http.StatusBadRequest)
+		return
+	}
+	if !isEditable(filepath.Base(abs)) {
+		http.Error(w, "file type not editable", http.StatusBadRequest)
+		return
+	}
+	data, err := os.ReadFile(abs)
+	if err != nil {
+		http.Error(w, "read: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Write(data)
+}
+
+// handleSave overwrites an editable file with the request body, atomically.
+func (s *Server) handleSave(w http.ResponseWriter, r *http.Request) {
+	rel := r.URL.Query().Get("path")
+	abs, err := s.resolvePath(rel)
+	if err != nil {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	info, err := os.Stat(abs)
+	if err != nil || info.IsDir() {
+		http.Error(w, "not a file", http.StatusBadRequest)
+		return
+	}
+	if !isEditable(filepath.Base(abs)) {
+		http.Error(w, "file type not editable", http.StatusBadRequest)
+		return
+	}
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "read body: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	dir := filepath.Dir(abs)
+	tmp, err := os.CreateTemp(dir, ".filez-edit-*")
+	if err != nil {
+		http.Error(w, "create temp: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmpName := tmp.Name()
+	if _, err := tmp.Write(body); err != nil {
+		tmp.Close()
+		os.Remove(tmpName)
+		http.Error(w, "write temp: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmpName)
+		http.Error(w, "close temp: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Chmod(tmpName, 0o644); err != nil {
+		os.Remove(tmpName)
+		http.Error(w, "chmod temp: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := os.Rename(tmpName, abs); err != nil {
+		os.Remove(tmpName)
+		http.Error(w, "rename: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *Server) handleMkdir(w http.ResponseWriter, r *http.Request) {
 	rel := r.URL.Query().Get("path")
 	name := r.URL.Query().Get("name")

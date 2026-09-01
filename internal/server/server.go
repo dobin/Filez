@@ -23,6 +23,8 @@ func New(root, token string) http.Handler {
 		r.Post("/api/upload", s.handleUpload)
 		r.Get("/api/download", s.handleDownload)
 		r.Get("/api/blob", s.handleBlob)
+		r.Get("/api/read", s.handleRead)
+		r.Post("/api/save", s.handleSave)
 		r.Post("/api/delete", s.handleDelete)
 		r.Post("/api/mkdir", s.handleMkdir)
 	})

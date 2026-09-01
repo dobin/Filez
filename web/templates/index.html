@@ -51,8 +51,9 @@
 				<td>{{if .IsDir}}&mdash;{{else}}{{humanSize .Size}}{{end}}</td>
 				<td>{{.ModTime.Format "2006-01-02 15:04"}}</td>
 				<td class="actions-cell">
-					{{if not .IsDir}}
-					<button type="button" data-action="download" data-path="{{$p}}" data-name="{{.Name}}">Download</button>
+					{{if not .IsDir}}				{{if or (hasSuffix .Name ".txt") (hasSuffix .Name ".md")}}
+				<button type="button" data-action="edit" data-path="{{$p}}" data-name="{{.Name}}">Edit</button>
+				{{end}}					<button type="button" data-action="download" data-path="{{$p}}" data-name="{{.Name}}">Download</button>
 					<button type="button" data-action="blob" data-path="{{$p}}" data-name="{{.Name}}">JS</button>
 					{{end}}
 					<button type="button" data-action="delete" data-path="{{$p}}" data-name="{{.Name}}">Delete</button>
@@ -63,6 +64,16 @@
 		</tbody>
 	</table>
 </main>
+
+<div class="modal-overlay" id="editModal" hidden>
+	<div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+		<div class="modal-head">
+			<strong id="editTitle">Edit</strong>
+			<span class="modal-hint">Ctrl+S saves &middot; click outside or Esc to save &amp; close</span>
+		</div>
+		<textarea id="editArea" spellcheck="false" autocomplete="off"></textarea>
+	</div>
+</div>
 
 <script>window.__CURRENT_PATH__ = {{.Path}};</script>
 <script src="/static/app.js"></script>

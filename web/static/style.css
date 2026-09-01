@@ -116,3 +116,54 @@ td.empty, td.err { color: var(--muted); text-align: center; }
 	color: #fff;
 	border-color: var(--accent);
 }
+
+/* Text editor modal */
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+.modal-overlay[hidden] { display: none; }
+.modal-overlay.open { display: flex; }
+
+.modal {
+	background: #fff;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	width: 90vw;
+	max-width: 800px;
+	max-height: 90vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+.modal-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.6rem 0.9rem;
+	border-bottom: 1px solid var(--border);
+	background: #f5f5f5;
+}
+.modal-hint { font-size: 0.8rem; color: var(--muted); }
+
+#editArea {
+	flex: 1 1 auto;
+	width: 100%;
+	min-height: 60vh;
+	border: none;
+	border-radius: 0 0 8px 8px;
+	padding: 0.75rem;
+	font-family: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+	font-size: 13px;
+	line-height: 1.4;
+	resize: none;
+	outline: none;
+}
+#editArea:disabled { color: var(--muted); }
