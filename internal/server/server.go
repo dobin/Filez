@@ -27,6 +27,7 @@ func New(root, token string) http.Handler {
 		r.Post("/api/save", s.handleSave)
 		r.Post("/api/delete", s.handleDelete)
 		r.Post("/api/mkdir", s.handleMkdir)
+		r.Post("/api/newfile", s.handleNewFile)
 	})
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(web.StaticSubFS()))))

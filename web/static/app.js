@@ -64,6 +64,20 @@
 		if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files);
 	});
 
+	// New file.
+	var newFileBtn = document.getElementById("newFileBtn");
+	if (newFileBtn) {
+		newFileBtn.addEventListener("click", function () {
+			var name = prompt("File name");
+			if (!name) return;
+			var url = "/api/newfile?path=" + encodeURIComponent(currentPath) + "&name=" + encodeURIComponent(name);
+			fetch(url, { method: "POST" }).then(function (r) {
+				if (r.ok) location.reload();
+				else r.text().then(function (t) { alert("create file failed: " + t); });
+			});
+		});
+	}
+
 	// New folder.
 	var newFolderBtn = document.getElementById("newFolderBtn");
 	if (newFolderBtn) {

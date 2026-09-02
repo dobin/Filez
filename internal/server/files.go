@@ -313,3 +313,25 @@ func (s *Server) handleMkdir(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// handleNewFile creates an empty file in the requested directory.
+func (s *Server) handleNewFile(w http.ResponseWriter, r *http.Request) {
+	rel := r.URL.Query().Get("path")
+	name := r.URL.Query().Get("name")
+	if name == "" || strings.ContainsAny(name, `/\`) {
+		http.Error(w, "invalid file name", http.StatusBadRequest)
+		return
+	}
+	abs, err := s.resolvePath(rel)
+	if err != nil {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	f, err := os.OpenFile(filepath.Join(abs, filepath.Base(name)), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		http.Error(w, "create file: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	f.Close()
+	w.WriteHeader(http.StatusNoContent)
+}
